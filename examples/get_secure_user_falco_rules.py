@@ -31,7 +31,7 @@ ok, res = sdclient.get_user_falco_rules()
 # Return the result
 #
 if ok:
-    sys.stdout.write(res["userRulesFile"]["content"])
+    sys.stdout.write(res)
 else:
     print(res)
     sys.exit(1)
