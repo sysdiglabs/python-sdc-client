@@ -65,7 +65,16 @@ class SdSecureClient(PolicyEventsClientV1, PolicyEventsClientOld, _SdcCommon):
         **Example**
             `examples/get_secure_user_falco_rules.py <https://github.com/draios/python-sdc-client/blob/master/examples/get_secure_user_falco_rules.py>`_
         '''
-        return self._get_falco_rules("user")
+        ok, res = self._get_user_falco_rules()
+        return res if not ok else [True, res["customFalcoRulesFiles"]["files"][0]["variants"][0]["content"]]
+
+    def _get_user_falco_rules(self):
+        res = requests.get(self.url + '/api/settings/falco/customRulesFiles', headers=self.hdrs, verify=self.ssl_verify)
+
+        if not self._checkResponse(res):
+            return [False, self.lasterr]
+
+        return [True, (res.json())]
 
     def _set_falco_rules(self, kind, rules_content):
         payload = self._get_falco_rules(kind)
@@ -111,7 +120,21 @@ class SdSecureClient(PolicyEventsClientV1, PolicyEventsClientOld, _SdcCommon):
             `examples/set_secure_user_falco_rules.py <https://github.com/draios/python-sdc-client/blob/master/examples/get_secure_user_falco_rules.py>`_
 
         '''
-        return self._set_falco_rules("user", rules_content)
+        ok, res = self._get_user_falco_rules()
+
+        if not ok:
+            return res
+
+        res["customFalcoRulesFiles"]["files"][0]["variants"][0]["content"] = rules_content
+
+        res = requests.put(self.url + '/api/settings/falco/customRulesFiles', headers=self.hdrs,
+                           data=json.dumps(res), verify=self.ssl_verify)
+
+        if not self._checkResponse(res):
+            return [False, self.lasterr]
+        res_json = res.json()
+        return [True, res_json["customFalcoRulesFiles"]["files"][0]["variants"][0]["content"]]
+
 
     # Only one kind for now called "default", but might add a "custom" kind later.
     def _get_falco_rules_files(self, kind):
