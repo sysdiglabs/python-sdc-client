@@ -1,6 +1,6 @@
 import os
 
-from expects import equal, expect, start_with
+from expects import equal, expect, start_with, contain
 from mamba import before, context, description, it
 
 from sdcclient import SdSecureClient
@@ -31,17 +31,21 @@ with description("Custom Rules") as self:
         expect((ok, res)).to(be_successful_api_call)
         expect(res).to(equal(empty_rules))
 
+        ok, res = self.client.set_user_falco_rules(self.rules_without_header())
+        expect((ok, res)).to(be_successful_api_call)
+        # The endpoint automatically fills the header for the user.
+        expect(res).to(start_with("####################\n# Your custom rules!\n####################\n\n"))
+        expect(res).to(contain(self.rules_without_header()))
+
         ok, res = self.client.set_user_falco_rules(previous_rules)
         expect((ok, res)).to(be_successful_api_call)
         expect(res).to(equal(previous_rules))
 
 
-
-
-
     def user_falco_rules(self):
         with open("fixtures/custom_rules.yaml", "r") as f:
             return f.read()
+
 
     def empty_falco_rules(self):
         return """####################
@@ -57,4 +61,17 @@ with description("Custom Rules") as self:
 #   tags: [shell]
 
 # Or override any rule, macro, or list from the Default Rules
+"""
+
+
+    def rules_without_header(self):
+        return """\
+---
+- rule: "Testing rule"
+  desc: "Description"
+  condition: "always_true"
+  output: "Sample output"
+  priority: "WARNING"
+  tags: []
+  source: "syscall"
 """

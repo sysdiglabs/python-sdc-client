@@ -35,7 +35,9 @@ EOF
 
 $SCRIPTDIR/../examples/set_secure_user_falco_rules.py $PYTHON_SDC_TEST_API_TOKEN /tmp/test_apis_user_rules.yaml
 $SCRIPTDIR/../examples/get_secure_user_falco_rules.py $PYTHON_SDC_TEST_API_TOKEN > /tmp/falco_rules.yaml
-diff /tmp/falco_rules.yaml /tmp/test_apis_user_rules.yaml
+# Removed comparison. The new endpoint automatically adds a header to the YAML file,
+# and this use case is already covered in the custom_rules_spec.py test file.
+# diff /tmp/falco_rules.yaml /tmp/test_apis_user_rules.yaml
 
 
 # Delete all policies and then get them. There should be none.
