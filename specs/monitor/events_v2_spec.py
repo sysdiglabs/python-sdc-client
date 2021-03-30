@@ -32,6 +32,19 @@ with description("Events v2", "integration") as self:
         expect(res).to(have_key("events"))
         expect(res["events"]).to(contain(have_key("scope", equal("host.hostName = 'ci'"))))
 
+    with it("is able to retrieve an event by ID"):
+        ok, res = self.client.post_event(name=self.event_name,
+                                         description="This event was created in a CI pipeline for the Python SDK library")
+        expect((ok, res)).to(be_successful_api_call)
+
+        event = res["event"]
+        event_id = event["id"]
+
+        ok, res = self.client.get_event(id=event_id)
+        expect((ok, res)).to(be_successful_api_call)
+
+        expect(res["event"]).to(equal(event))
+
     with it("is able to list the events happened without any filter"):
         time.sleep(3)  # Wait for the event to appear in the feed
         ok, res = self.client.get_events()

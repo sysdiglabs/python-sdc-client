@@ -79,6 +79,29 @@ class EventsClientV2(_SdcCommon):
         res = self.http.get(self.url + '/api/v2/events/', headers=self.hdrs, params=params, verify=self.ssl_verify)
         return self._request_result(res)
 
+    def get_event(self, id):
+        """
+        Retrieve an event using the ID
+        Args:
+            id(str): ID of the event to retrieve
+
+        Returns:
+            A tuple where the first parameter indicates if the call was successful,
+            and the second parameter holds either the error as string, or the event matching this ID.
+
+        Examples:
+            >>> from sdcclient.monitor import EventsClientV2
+            >>> client = EventsClientV2(token=SECURE_TOKEN)
+            >>> ok, res = client.get_event(id='2343214984')
+            >>> if ok:
+            >>>     print(res["event"])
+        """
+
+        url = f'{self.url}/api/v2/events/{id}'
+        res = self.http.get(url, headers=self.hdrs, verify=self.ssl_verify)
+        return self._request_result(res)
+
+
     def delete_event(self, event):
         '''**Description**
             Deletes an event.
@@ -132,3 +155,4 @@ class EventsClientV2(_SdcCommon):
         res = self.http.post(self.url + '/api/v2/events/', headers=self.hdrs, data=json.dumps(edata),
                              verify=self.ssl_verify)
         return self._request_result(res)
+

@@ -36,6 +36,27 @@ class EventsClientV1(_SdcCommon):
         res = self.http.get(self.url + '/api/events/', headers=self.hdrs, params=params, verify=self.ssl_verify)
         return self._request_result(res)
 
+    def get_event(self, id):
+        """
+        Retrieve an event using the ID
+        Args:
+            id(str): ID of the event to retrieve
+
+        Returns:
+            A tuple where the first parameter indicates if the call was successful,
+            and the second parameter holds either the error as string, or the event matching this ID.
+
+        Examples:
+            >>> from sdcclient.monitor import EventsClientV1
+            >>> client = EventsClientV1(token=SECURE_TOKEN)
+            >>> ok, res = client.get_event(id='2343214984')
+            >>> if ok:
+            >>>     print(res["event"])
+        """
+        url = f'{self.url}/api/events/{id}'
+        res = self.http.get(url, headers=self.hdrs, verify=self.ssl_verify)
+        return self._request_result(res)
+
     def post_event(self, name, description=None, severity=None, event_filter=None, tags=None):
         '''**Description**
             Send an event to Sysdig Monitor. The events you post are available in the Events tab in the Sysdig Monitor UI and can be overlied to charts.
