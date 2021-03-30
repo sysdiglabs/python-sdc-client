@@ -12,20 +12,6 @@
 
 # Or override any rule, macro, or list from the Default Rules
 ---
-- macro: "user_known_k8s_client_container"
-  condition: "container.image.repository=\"k8s.gcr.io/fluentd-gcp-scaler\" or container.image.repository=\"\
-    fluxcd/flux\" or container.image.repository=\"sysdig/agent\" or container.image.repository=\"\
-    fluxcd/helm-operator\" or (container.image.repository=\"google/cloud-sdk\")"
-  append: false
-
-- macro: "user_known_write_below_root_activities"
-  condition: "(container.image.repository startswith \"bbcdocker/go-synapse\" and\
-    \ fd.name=\"/haproxy.conf\") or (container.image.repository=\"cassandra\" and\
-    \ fd.name startswith \"/root/.cassandra/\") or (container.id=host and fd.name\
-    \ startswith /root/.kube/) or (container.image.repository=\"mariadb\" and proc.name=\"\
-    mysqld\") or (container.image.repository=\"mariadb\" and proc.name=\"mysql\")"
-  append: false
-
 - macro: "user_known_network_tool_client_container"
   condition: "container.image.repository=\"bbcdocker/go-synapse\" or container.image.repository=\"\
     strimzi/kafka\" or container.image.repository=\"landoop/fast-data-dev\""
@@ -48,12 +34,6 @@
   - "shell"
   - "mitre_execution"
   source: "syscall"
-  append: false
-
-- macro: "user_known_write_below_etc_activities"
-  condition: "(container.image.repository=\"quay.io/thanos/thanos\" and fd.name=\"\
-    /etc/prom/prometheus.yaml.tmp\" or (container.image.repository=\"eu.gcr.io/bbc-registry/comuto3\"\
-    \ and fd.name startswith \"/etc/nginx/\"))"
   append: false
 
 - rule: "The docker client is executed in a container"
@@ -83,39 +63,6 @@
   tags:
   - "mitre_remote_access_tools"
   - "users"
-  append: false
-
-- macro: "user_known_write_etc_conditions"
-  condition: "proc.name=confd or (container.image.repository=\"confluentinc/cp-schema-registry\"\
-    \ and fd.name startswith \"/etc/schema-registry/\") or (container.image.repository=\"\
-    eu.gcr.io/bbc-registry/communication\" and fd.name startswith \"/etc/nginx/\"\
-    ) or (container.image.repository=\"eu.gcr.io/bbc-registry/redirector\" and fd.name\
-    \ startswith \"/etc/nginx/\") or (container.image.repository=\"eu.gcr.io/bbc-registry/webhooks\"\
-    \ and fd.name startswith \"/etc/nginx/\")or (container.image.repository=\"thanosio/thanos\"\
-    \ and fd.name startswith \"/etc/prom/\") or (container.image.repository=\"eu.gcr.io/bbc-registry/insurance-backoffice\"\
-    \ and fd.name startswith \"/etc/nginx/\") or (container.id=\"host\" and proc.name=\"\
-    exe\" and proc.pname=\"dockerd\")"
-  append: false
-
-- macro: "user_known_package_manager_in_container"
-  condition: "(container.image.repository=\"confluentinc/cp-schema-registry\" and\
-    \ proc.name=\"pip\") or (container.image.repository=sysdig/node-image-analyzer\
-    \ and proc.name=rpm)"
-  append: false
-
-- macro: "user_privileged_containers"
-  condition: "(container.image.repository endswith sysdig/agent) or (container.image.repository=weaveworks/scope)\
-    \ or (container.image.repository=docker.io/weaveworks/scope) or (container.image.repository=gcr.io/google-containers/startup-script)\
-    \ or (container.image.repository=gke.gcr.io/kube-proxy) or (container.image.repository=sysdig/node-image-analyzer)"
-  append: false
-
-- macro: "user_sensitive_mount_containers"
-  condition: "(container.image.repository = docker.io/sysdig/agent) or (container.image.repository=quay.io/prometheus/node-exporter)\
-    \ or (container.image.repository=weaveworks/scope) or (container.image.repository=datadog/agent)"
-  append: false
-
-- macro: "user_known_change_thread_namespace_activities"
-  condition: "container.image.repository=gcr.io/google-containers/startup-script"
   append: false
 
 - list: "user_known_hostnetwork_images"
@@ -168,23 +115,6 @@
   tags: []
   append: true
 
-- macro: "user_shell_container_exclusions"
-  condition: "((container.image.repository=bitnami/rabbitmq and proc.pname=erl) or\
-    \ (container.image.repository=bitnami/rabbitmq and proc.pname=\"beam.smp\"))"
-  append: false
-
-- macro: "user_known_write_root_conditions"
-  condition: "(fd.name=/root/.bash_history) or (container.image.repository=\"cassandra\"\
-    \ and fd.name startswith \"/root/.cassandra/\") or (container.image.repository=\"\
-    bbcdocker/go-synapse\" and fd.name=\"/haproxy.conf\") or (container.id=\"host\"\
-    \ and proc.name=\"exe\" and proc.pname=\"dockerd\")"
-  append: false
-
-- macro: "exe_running_docker_save"
-  condition: "((proc.cmdline startswith \"exe /var/lib/docker\" or proc.cmdline startswith\
-    \ \"exe / /var/lib/docker\") and proc.pname in (dockerd, docker))"
-  append: false
-
 - rule: "Update Package Repository"
   condition: "and not exe_running_docker_save"
   tags: []
@@ -200,11 +130,6 @@
     system-probe\")"
   tags: []
   append: true
-
-- macro: "allowed_clear_log_files"
-  condition: "(container.image.repository=\"landoop/fast-data-dev\" and fd.name=\"\
-    /var/log/broker.log\")"
-  append: false
 
 - list: "user_known_gke_metadata_images"
   items:
@@ -225,7 +150,7 @@
 
 - macro: "mariadb_snapshots_validator"
   condition: "(container.image.repository=\"google/cloud-sdk\" and container.name\
-    \ contains\"snapshot-validator\")"
+    \ contains \"snapshot-validator\")"
   append: false
 
 - macro: "bbc_java_app_proc"
@@ -286,10 +211,6 @@
   tags: []
   append: true
 
-- macro: "user_shell_container_exclusions"
-  condition: "(container.image.repository=\"kong\" and proc.pname=\"nginx\")"
-  append: false
-
 - list: "user_known_privilged_k8s_roles"
   items:
   - "mariadb-moderation-snapshot-validated"
@@ -319,21 +240,6 @@
   tags: []
   append: true
 
-- macro: "user_known_network_tool_activities"
-  condition: "(container.image.repository=\"mariadb\" and (proc.pname=\"wsrep_sst_maria\"\
-    \ or proc.pname=\"timeout\") and proc.name=\"socat\")"
-  append: false
-
-- macro: "user_shell_container_exclusions"
-  condition: "(container.image.repository=\"mariadb\" and proc.pname=\"mysqld\" and\
-    \ proc.name=\"sh\")"
-  append: false
-
-- macro: "user_known_remote_file_copy_activities"
-  condition: "(container.image.repository=\"eu.gcr.io/bbc-registry/command-export-russian-user\"\
-    \ and proc.name=\"sftp\")"
-  append: false
-
 - rule: "Launch Remote File Copy Tools in Container"
   condition: "and not user_known_remote_file_copy_activities"
   tags: []
@@ -348,27 +254,6 @@
   condition: "and not user_known_container_drift_open_create_activities"
   tags: []
   append: true
-
-- macro: "user_known_container_drift_activities"
-  condition: "((container.image.repository=\"fluxcd/helm-operator\" and proc.name=\"\
-    git\" and evt.arg.filename endswith \"/.git/config\") or (container.image.repository=\"\
-    fluxcd/flux\" and proc.name=\"git\" and evt.arg.filename endswith \"/.git/config\"\
-    ) or (container.image.repository=\"k8s.gcr.io/fluentd-gcp-scaler\" and proc.name=\"\
-    kubectl\" and evt.arg.filename startswith \"/root/.kube/cache/discovery/\") or\
-    \ (container.image.repository=\"eu.gcr.io/bbc-registry/command-bnp-payout-report\"\
-    \ and proc.name=\"gpg-agent\" and evt.arg.filename startswith \"/root/.gnupg/\"\
-    ) or (container.image.repository=\"gcr.io/stackdriver-agents/stackdriver-logging-agent\"\
-    \ and evt.arg.filename startswith \"/var/run/google-fluentd/\") or (container.image.repository=\"\
-    weaveworks/prom-aggregation-gateway\" and proc.name=\"prom-aggregatio\" and evt.arg.filename\
-    \ startswith \"/var/lib/docker/\") or (container.image.repository=\"datadog/agent\"\
-    \ and proc.name=\"system-probe\" and evt.arg.filename startswith \"/var/run/sysprobe/\"\
-    ) or (container.image.repository=\"docker.elastic.co/elasticsearch/elasticsearch\"\
-    \ and proc.name=\"java\" and evt.arg.filename startswith \"/usr/share/elasticsearch/plugins/\"\
-    ) or (container.image.repository=\"docker.elastic.co/elasticsearch/elasticsearch\"\
-    \ and proc.name=\"cp\" and evt.arg.filename startswith \"/mnt/elastic-internal/elasticsearch-config-local/\"\
-    ) or (container.image.repository=\"istio/proxyv2\" and proc.name=\"pilot-agent\"\
-    \ and evt.arg.filename startswith \"/var/lib/docker/overlay2/\"))"
-  append: false
 
 - macro: "test_foo_bar"
   condition: "never_true"
