@@ -20,7 +20,7 @@ with description("Events v1", "integration") as self:
 
     with it("is able to retrieve an event by ID"):
         ok, res = self.client.post_event(name=self.event_name,
-                                      description="This event was created in a CI pipeline for the Python SDK library")
+                                         description="This event was created in a CI pipeline for the Python SDK library")
         expect((ok, res)).to(be_successful_api_call)
 
         event = res["event"]

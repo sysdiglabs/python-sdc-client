@@ -101,7 +101,6 @@ class EventsClientV2(_SdcCommon):
         res = self.http.get(url, headers=self.hdrs, verify=self.ssl_verify)
         return self._request_result(res)
 
-
     def delete_event(self, event):
         '''**Description**
             Deletes an event.
@@ -155,4 +154,3 @@ class EventsClientV2(_SdcCommon):
         res = self.http.post(self.url + '/api/v2/events/', headers=self.hdrs, data=json.dumps(edata),
                              verify=self.ssl_verify)
         return self._request_result(res)
-
